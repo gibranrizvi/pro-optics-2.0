@@ -3,7 +3,7 @@ import {
   FirebaseContext,
   createUserProfileDocument
 } from '../../firebase/firebase';
-import TextFieldGroup from '../../components/textfieldgroup/TextFieldGroup';
+import TextFieldGroup from '../../components/text-field-group/TextFieldGroup';
 
 const Login = ({ history }) => {
   const { currentUser, auth } = React.useContext(FirebaseContext);

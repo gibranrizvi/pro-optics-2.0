@@ -9,7 +9,10 @@ import Navbar from './components/navbar/Navbar';
 
 // Styles
 import './App.css';
+
+// Page imports
 import Login from './pages/login/Login';
+import Dashboard from './pages/dashboard/Dashboard';
 
 const App = () => {
   const currentUser = useAuth();
@@ -22,9 +25,7 @@ const App = () => {
         <Navbar />
         <Switch>
           <Route exact path="/login" component={Login} />
-          <Route />
-          <Route />
-          <Route />
+          <Route exact path="/dashboard" component={Dashboard} />
         </Switch>
       </div>
     </FirebaseContext.Provider>
