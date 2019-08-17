@@ -8,11 +8,10 @@ import { firebaseConfig } from '../config/config';
 export const createUserProfileDocument = async ({
   uid,
   email,
-  first_name,
-  last_name,
-  profile_picture,
+  name,
+  handle,
   role,
-  emailVerified
+  company
 }) => {
   const userRef = firestore.doc(`users/${uid}`);
   const snapshot = await userRef.get();
@@ -24,11 +23,10 @@ export const createUserProfileDocument = async ({
     try {
       await userRef.set({
         email,
-        first_name,
-        last_name,
-        profile_picture,
+        name,
+        handle,
         role,
-        emailVerified,
+        company,
         created_at
       });
     } catch (error) {
@@ -40,8 +38,7 @@ export const createUserProfileDocument = async ({
 
     try {
       await userRef.update({
-        last_logged_in,
-        emailVerified
+        last_logged_in
       });
     } catch (error) {
       console.log(error.message);

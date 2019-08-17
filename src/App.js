@@ -9,6 +9,7 @@ import Navbar from './components/navbar/Navbar';
 
 // Styles
 import './App.css';
+import Login from './pages/login/Login';
 
 const App = () => {
   const currentUser = useAuth();
@@ -20,7 +21,7 @@ const App = () => {
       <div className="App">
         <Navbar />
         <Switch>
-          <Route />
+          <Route exact path="/login" component={Login} />
           <Route />
           <Route />
           <Route />
