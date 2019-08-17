@@ -33,7 +33,7 @@ const Login = ({ history }) => {
       return setErrors({
         ...errors,
         usernameOrEmail: '',
-        password: 'Password field is required'
+        password: 'Password is required'
       });
     }
 
@@ -74,7 +74,8 @@ const Login = ({ history }) => {
                 name="usernameOrEmail"
                 value={usernameOrEmail}
                 onChange={event => setUsernameOrEmail(event.target.value)}
-                error={errors.usernameOrEmail}
+                error={errors.usernameOrEmail || errors.general}
+                errorMessage={errors.usernameOrEmail}
                 autoFocus={true}
               />
               <TextFieldGroup
@@ -83,7 +84,8 @@ const Login = ({ history }) => {
                 type="password"
                 value={password}
                 onChange={event => setPassword(event.target.value)}
-                error={errors.password}
+                error={errors.password || errors.general}
+                errorMessage={errors.password || errors.general}
               />
               <input type="submit" className="btn btn-primary btn-block mt-4" />
             </form>

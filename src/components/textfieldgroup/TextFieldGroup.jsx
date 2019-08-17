@@ -6,6 +6,7 @@ const TextFieldGroup = ({
   value,
   label,
   error,
+  errorMessage,
   info,
   type,
   onChange,
@@ -27,7 +28,7 @@ const TextFieldGroup = ({
           autoFocus={autoFocus}
         />
         {info && <small className="form-text text-muted">{info}</small>}
-        {error && <div className="invalid-feedback">{error}</div>}
+        {error && <div className="invalid-feedback">{errorMessage}</div>}
       </div>
     </div>
   );
