@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
 import FirebaseContext from '../../firebase/context';
+
+// Component imports
 import OpenCloseModal from '../open-close-modal/OpenCloseModal';
+import TechnicianModal from '../technician-modal/TechnicianModal';
+import StatusModal from '../status-modal/StatusModal';
 
 const TicketItem = ({ ticket }) => {
   const { currentUser } = React.useContext(FirebaseContext);
