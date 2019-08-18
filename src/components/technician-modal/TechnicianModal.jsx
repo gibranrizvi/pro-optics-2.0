@@ -22,7 +22,7 @@ const TechnicianModal = ({ ticket }) => {
 
   React.useEffect(() => {
     getTechnicians();
-  }, []);
+  });
 
   const getTechnicians = async () => {
     setLoading(true);
@@ -45,24 +45,8 @@ const TechnicianModal = ({ ticket }) => {
     event.preventDefault();
 
     const assignedTechnicians = {};
-
-    if (leadsman) {
-      assignedTechnicians.leadsman = leadsman;
-      const leadsman = technicians.find(
-        technician => technician._id === leadsman
-      );
-      assignedTechnicians.leadsmanName = leadsman.name;
-      assignedTechnicians.leadsmanHandle = leadsman.handle;
-    }
-
-    if (assistant) {
-      assignedTechnicians.assistant = assistant;
-      const assistant = technicians.find(
-        technician => technician._id === assistant
-      );
-      assignedTechnicians.assistantName = assistant.name;
-      assignedTechnicians.assistantHandle = assistant.handle;
-    }
+    assignedTechnicians.leadsman = leadsman;
+    assignedTechnicians.assistant = assistant;
 
     // TODO assignTicket(ticket._id, assignedTechnicians);
     setLeadsman(null);
