@@ -3,7 +3,7 @@ import { Link, withRouter } from 'react-router-dom';
 
 import FirebaseContext from '../../firebase/context';
 
-const Navbar = props => {
+const Navbar = ({ history }) => {
   const { auth, currentUser } = React.useContext(FirebaseContext);
 
   const authLinks = (
@@ -55,7 +55,10 @@ const Navbar = props => {
             <div className="dropdown-divider" />
             <button
               className="btn dropdown-item text-right"
-              onClick={() => auth.signOut()}
+              onClick={() => {
+                auth.signOut();
+                history.push('/login');
+              }}
             >
               <i className="fas fa-sign-out-alt" /> Logout
             </button>
@@ -65,7 +68,10 @@ const Navbar = props => {
         <li className="nav-item">
           <button
             className="btn nav-button nav-link"
-            onClick={() => auth.signOut()}
+            onClick={() => {
+              auth.signOut();
+              history.push('/login');
+            }}
           >
             <i className="fas fa-sign-out-alt" /> Logout
           </button>

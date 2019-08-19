@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
 
-import Spinner from '../common/Spinner';
-import TextFieldGroup from '../common/TextFieldGroup';
-import SelectListGroup from '../common/SelectListGroup';
-import EquipmentFieldGroup from '../common/EquipmentFieldGroup';
-
 import {
   statusOptions,
   descriptionOptionsHFC,
@@ -12,8 +7,17 @@ import {
   tvPackageOptions,
   internetPackageOptions
 } from '../../utils/select-lists';
+import FirebaseContext from '../../firebase/context';
+
+// Component imports
+import Spinner from '../../components/spinner/Spinner';
+import EquipmentFieldGroup from '../../components/equipment-field-group/EquipmentFieldGroup';
+import SelectListGroup from '../../components/select-list-group/SelectListGroup';
+import TextFieldGroup from '../../components/text-field-group/TextFieldGroup';
 
 class CreateTicket extends Component {
+  static contextType = FirebaseContext;
+
   state = {
     ticketType: '',
     description: '',
@@ -68,17 +72,28 @@ class CreateTicket extends Component {
     technoColour: false,
     technoColourMac: '',
     technoColourSerial: '',
-    errors: {}
+    errors: {},
+    technicians: null,
+    technicianLoading: false
   };
 
   componentDidMount() {
-    const { role } = this.props.auth.currentUser;
-    if (role === 'technician') {
-      this.props.history.push('/dashboard');
+    const { currentUser } = this.context;
+    if (currentUser) {
+      const { role } = currentUser;
+      if (role === 'technician') {
+        this.props.history.push('/dashboard');
+      }
+    }
+    if (!currentUser) {
+      this.props.history.push('/login');
     }
   }
 
   componentDidUpdate(prevProps) {
+    if (!this.context.currentUser) {
+      this.props.history.push('/login');
+    }
     if (prevProps.errors !== this.props.errors) {
       this.setState({ errors: this.props.errors });
     }
@@ -89,7 +104,7 @@ class CreateTicket extends Component {
 
     const newTicket = this.state;
 
-    const { technicians } = this.props.technician;
+    const { technicians } = this.state;
 
     if (this.state.leadsman !== '') {
       const leadsman = technicians.find(
@@ -107,7 +122,7 @@ class CreateTicket extends Component {
       newTicket.assistantName = assistant.name;
       newTicket.assistantHandle = assistant.handle;
     }
-    this.props.createTicket(newTicket, this.props.history);
+    // TODO this.props.createTicket(newTicket, this.props.history);
   };
 
   onChange = event => {
@@ -127,8 +142,8 @@ class CreateTicket extends Component {
     this.setState({ ticketType: 'GPON' });
   };
 
-  getAvailableTechnicians = technicians => {
-    const { leadsman } = this.state;
+  getAvailableTechnicians = () => {
+    const { leadsman, technicians } = this.state;
     if (leadsman !== '') {
       return technicians.filter(technician => technician._id !== leadsman);
     } else {
@@ -140,7 +155,7 @@ class CreateTicket extends Component {
     event.preventDefault();
 
     this.setState({ addTechnicians: true });
-    this.props.getTechnicians();
+    // TODO this.props.getTechnicians();
   };
 
   onAddNumberClick = event => {
@@ -154,14 +169,19 @@ class CreateTicket extends Component {
   };
 
   render() {
-    const { errors, ticketType, leadsman } = this.state;
-    const { technicians, technicianLoading } = this.props.technician;
-    const { currentUser } = this.props.auth;
+    const {
+      errors,
+      ticketType,
+      leadsman,
+      technicians,
+      technicianLoading
+    } = this.state;
+    const { currentUser } = this.context;
 
     let ticketForm;
     let technicianFields;
 
-    if (technicians === null || technicianLoading) {
+    if (!technicians || technicianLoading) {
       technicianFields = <Spinner />;
     } else {
       technicianFields = (
@@ -183,12 +203,10 @@ class CreateTicket extends Component {
             value={this.state.assistant}
             onChange={this.onChange}
             placeholderOption="Select an Assistant"
-            items={this.getAvailableTechnicians(technicians).map(
-              technician => ({
-                label: technician.name,
-                value: technician._id
-              })
-            )}
+            items={this.getAvailableTechnicians().map(technician => ({
+              label: technician.name,
+              value: technician._id
+            }))}
             disabled={leadsman === '' ? true : false}
             fieldLabel={this.state.assistant !== '' && 'Assistant:'}
             error={errors.assistant}

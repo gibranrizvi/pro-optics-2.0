@@ -28,6 +28,16 @@ class Tickets extends Component {
       this.setState({ loading: true });
       this.unsubscribe = this.getTickets();
     }
+
+    if (!this.context.currentUser) {
+      this.props.history.push('/login');
+    }
+  }
+
+  componentDidUpdate() {
+    if (!this.context.currentUser) {
+      this.props.history.push('/login');
+    }
   }
 
   componentWillUnmount() {
