@@ -1,6 +1,10 @@
 import React from 'react';
 
 import { FirebaseContext } from '../../firebase/firebase';
+import {
+  descriptionOptionsHFC,
+  descriptionOptionsGPON
+} from '../../utils/select-lists';
 
 // Component imports
 import DashboardActions from '../../components/dashboard-actions/DashboardActions';
@@ -17,6 +21,7 @@ const Dashboard = ({ history }) => {
   const [showPending, setShowPending] = React.useState(false);
   const [showActive, setShowActive] = React.useState(false);
   const [showComplete, setShowComplete] = React.useState(false);
+  const [viewToggle, setViewToggle] = React.useState(false);
 
   const ticketsRef = firestore.collection('/tickets/');
 
@@ -80,6 +85,694 @@ const Dashboard = ({ history }) => {
         (ticket.status === 'Complete' ||
           ticket.status === 'Complete to activate at a later date') &&
         !ticket.closed
+    );
+
+    dashboardContent = (
+      <div>
+        <div>
+          {/* TODO {currentUser.role !== 'technician' && (
+            <DownloadReportModal tickets={tickets} />
+          )} */}
+          <button
+            onClick={() => setViewToggle(prevState => !prevState)}
+            className="btn btn-dark mb-3"
+          >
+            Toggle View
+          </button>
+        </div>
+        <br />
+
+        <div>
+          <h3 className="display-5 text-center mb-4">
+            Awaiting Action by Provider ({awaiting.length})
+          </h3>
+          {awaiting.length > 0 ? (
+            <p
+              className="lead text-center toggle"
+              onClick={() => setShowAwaiting(true)}
+            >
+              {showAwaiting ? 'Hide' : 'Show'}
+            </p>
+          ) : (
+            <p className="lead text-center">No tickets awaiting action</p>
+          )}
+          {showAwaiting && (
+            <div>
+              {viewToggle ? (
+                <div>
+                  <p className="lead">HFC</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+
+                  <p className="lead">GPON</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Migration</p>
+                  <TicketFeed
+                    tickets={awaiting.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[5].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <TicketFeed tickets={awaiting} currentUser={currentUser} />
+                </div>
+              )}
+              <p
+                className="lead text-center toggle"
+                onClick={() => showAwaiting(false)}
+              >
+                Hide
+              </p>
+            </div>
+          )}
+          <br />
+          <hr />
+          <h3 className="display-5 text-center mb-4">
+            Unassigned Tickets ({unassigned.length})
+          </h3>
+          {unassigned.length > 0 ? (
+            <p
+              className="lead text-center toggle"
+              onClick={() => setShowUnassigned(true)}
+            >
+              {showUnassigned ? 'Hide' : 'Show'}
+            </p>
+          ) : (
+            <p className="lead text-center">No tickets to be assigned</p>
+          )}
+          {showUnassigned && (
+            <div>
+              {viewToggle ? (
+                <div>
+                  <p className="lead">HFC</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+
+                  <p className="lead">GPON</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Migration</p>
+                  <TicketFeed
+                    tickets={unassigned.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[5].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <TicketFeed tickets={unassigned} currentUser={currentUser} />
+                </div>
+              )}
+              <p
+                className="lead text-center toggle"
+                onClick={() => setShowUnassigned(false)}
+              >
+                Hide
+              </p>
+            </div>
+          )}
+          <br />
+          <hr />
+          <h3 className="display-5 text-center mb-4">
+            Pending Tickets ({pending.length})
+          </h3>
+          {pending.length > 0 ? (
+            <p
+              className="lead text-center toggle"
+              onClick={() => setShowPending(true)}
+            >
+              {showPending ? 'Hide' : 'Show'}
+            </p>
+          ) : (
+            <p className="lead text-center">No pending tickets found</p>
+          )}
+          {showPending && (
+            <div>
+              {viewToggle ? (
+                <div>
+                  <p className="lead">HFC</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+
+                  <p className="lead">GPON</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Migration</p>
+                  <TicketFeed
+                    tickets={pending.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[5].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <TicketFeed tickets={pending} currentUser={currentUser} />
+                </div>
+              )}
+              <p
+                className="lead text-center toggle"
+                onClick={() => setShowPending(false)}
+              >
+                Hide
+              </p>
+            </div>
+          )}
+          <br />
+          <hr />
+          <h3 className="display-5 text-center mb-4">
+            Active Tickets ({active.length})
+          </h3>
+          {active.length > 0 ? (
+            <p
+              className="lead text-center toggle"
+              onClick={() => setShowActive(true)}
+            >
+              {showActive ? 'Hide' : 'Show'}
+            </p>
+          ) : (
+            <p className="lead text-center">No active tickets found</p>
+          )}
+          {showActive && (
+            <div>
+              {viewToggle ? (
+                <div>
+                  <p className="lead">HFC</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+
+                  <p className="lead">GPON</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Migration</p>
+                  <TicketFeed
+                    tickets={active.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[5].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <TicketFeed tickets={active} currentUser={currentUser} />
+                </div>
+              )}
+              <p
+                className="lead text-center toggle"
+                onClick={() => setShowActive(false)}
+              >
+                Hide
+              </p>
+            </div>
+          )}
+          <br />
+          <hr />
+          <h3 className="display-5 text-center mb-4">
+            Complete Tickets ({complete.length})
+          </h3>
+          {complete.length > 0 ? (
+            <p
+              className="lead text-center toggle"
+              onClick={() => setShowComplete(true)}
+            >
+              {showComplete ? 'Hide' : 'Show'}
+            </p>
+          ) : (
+            <p className="lead text-center">No complete tickets found</p>
+          )}
+          {showComplete && (
+            <div>
+              {viewToggle ? (
+                <div>
+                  <p className="lead">HFC</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsHFC[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+
+                  <p className="lead">GPON</p>
+                  <p className="text-muted">New Connection</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[0].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Reconnection</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[1].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Relocation</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[2].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Servicing</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[3].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Additional Services</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[4].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                  <hr />
+                  <p className="text-muted">Migration</p>
+                  <TicketFeed
+                    tickets={complete.filter(
+                      ticket =>
+                        ticket.description === descriptionOptionsGPON[5].value
+                    )}
+                    currentUser={currentUser}
+                  />
+                </div>
+              ) : (
+                <div>
+                  <TicketFeed tickets={complete} currentUser={currentUser} />
+                </div>
+              )}
+              <p
+                className="lead text-center toggle"
+                onClick={() => setShowComplete(false)}
+              >
+                Hide
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 
