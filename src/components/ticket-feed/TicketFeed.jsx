@@ -1,5 +1,7 @@
 import React from 'react';
 
+import TicketItem from '../ticket-item/TicketItem';
+
 const TicketFeed = ({ tickets }) => {
   const content = tickets.map(ticket => (
     <TicketItem key={ticket._id} ticket={ticket} />

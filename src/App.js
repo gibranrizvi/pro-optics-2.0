@@ -16,6 +16,8 @@ import Landing from './pages/landing/Landing';
 import Login from './pages/login/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import Register from './pages/register/Register';
+import Tickets from './pages/tickets/Tickets';
+// import CreateTicket from './pages/create-ticket/CreateTicket';
 
 const App = () => {
   const currentUser = useAuth();
@@ -31,6 +33,8 @@ const App = () => {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <Route exact path="/dashboard" component={Dashboard} />
+          <Route exact path="/tickets" component={Tickets} />
+          {/* <Route exact path="/create-ticket" component={CreateTicket} /> */}
         </Switch>
         <Footer />
       </div>

@@ -4,7 +4,7 @@ import { FirebaseContext } from '../../firebase/firebase';
 
 // Component imports
 import DashboardActions from '../../components/dashboard-actions/DashboardActions';
-import TicketFeed from '../../components/ticket-item/TicketItem';
+import TicketFeed from '../../components/ticket-feed/TicketFeed';
 import Spinner from '../../components/spinner/Spinner';
 
 const Dashboard = ({ history }) => {
@@ -95,9 +95,10 @@ const Dashboard = ({ history }) => {
           </div>
         </div>
         <div className="row">
-          <div className="col-md-12" />
-          {currentUser && <DashboardActions role={currentUser.role} />}
-          {dashboardContent}
+          <div className="col-md-12">
+            {currentUser && <DashboardActions role={currentUser.role} />}
+            {dashboardContent}
+          </div>
         </div>
       </div>
     </div>
