@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
 
 import {
+  firestore,
+  FirebaseContext,
+  createTicketDocument
+} from '../../firebase/firebase';
+import {
   statusOptions,
   descriptionOptionsHFC,
   descriptionOptionsGPON,
   tvPackageOptions,
   internetPackageOptions
 } from '../../utils/select-lists';
-import FirebaseContext from '../../firebase/context';
 
 // Component imports
 import Spinner from '../../components/spinner/Spinner';
@@ -18,13 +22,17 @@ import TextFieldGroup from '../../components/text-field-group/TextFieldGroup';
 class CreateTicket extends Component {
   static contextType = FirebaseContext;
 
+  techniciansRef = firestore
+    .collection('/users/')
+    .where('role', '==', 'technician');
+
   state = {
     ticketType: '',
     description: '',
     addTechnicians: false,
     status: '',
-    leadsman: '',
-    assistant: '',
+    leadsman: null,
+    assistant: null,
     tvPackage: '',
     internetPackage: '',
     name: '',
@@ -84,8 +92,7 @@ class CreateTicket extends Component {
       if (role === 'technician') {
         this.props.history.push('/dashboard');
       }
-    }
-    if (!currentUser) {
+    } else {
       this.props.history.push('/login');
     }
   }
@@ -99,30 +106,13 @@ class CreateTicket extends Component {
     }
   }
 
-  onSubmit = event => {
+  onSubmit = async event => {
     event.preventDefault();
 
-    const newTicket = this.state;
+    const ticketData = this.state;
+    const { currentUser } = this.context;
 
-    const { technicians } = this.state;
-
-    if (this.state.leadsman !== '') {
-      const leadsman = technicians.find(
-        technician => technician._id === this.state.leadsman
-      );
-
-      newTicket.leadsmanName = leadsman.name;
-      newTicket.leadsmanHandle = leadsman.handle;
-    }
-
-    if (this.state.assistant !== '') {
-      const assistant = technicians.find(
-        technician => technician._id === this.state.assistant
-      );
-      newTicket.assistantName = assistant.name;
-      newTicket.assistantHandle = assistant.handle;
-    }
-    // TODO this.props.createTicket(newTicket, this.props.history);
+    return await createTicketDocument(ticketData, currentUser);
   };
 
   onChange = event => {
@@ -134,28 +124,27 @@ class CreateTicket extends Component {
     this.setState({ [name]: !this.state[name] });
   };
 
-  onHFCClick = () => {
-    this.setState({ ticketType: 'HFC' });
+  onAddTechniciansClick = () => {
+    this.setState({ addTechnicians: true });
+    this.getTechnicians();
   };
 
-  onGPONClick = () => {
-    this.setState({ ticketType: 'GPON' });
+  getTechnicians = async () => {
+    this.setState({ technicianLoading: true });
+
+    const snapshot = await this.techniciansRef.get();
+    const technicians = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    this.setState({ technicians, technicianLoading: false });
   };
 
   getAvailableTechnicians = () => {
     const { leadsman, technicians } = this.state;
-    if (leadsman !== '') {
-      return technicians.filter(technician => technician._id !== leadsman);
-    } else {
-      return technicians;
-    }
-  };
 
-  onAddTechniciansClick = event => {
-    event.preventDefault();
-
-    this.setState({ addTechnicians: true });
-    // TODO this.props.getTechnicians();
+    return technicians.filter(technician => technician.id !== leadsman);
   };
 
   onAddNumberClick = event => {
@@ -173,10 +162,13 @@ class CreateTicket extends Component {
       errors,
       ticketType,
       leadsman,
+      assistant,
       technicians,
       technicianLoading
     } = this.state;
     const { currentUser } = this.context;
+
+    console.log({ technicians, leadsman, assistant });
 
     let ticketForm;
     let technicianFields;
@@ -188,32 +180,32 @@ class CreateTicket extends Component {
         <div>
           <SelectListGroup
             name="leadsman"
-            value={this.state.leadsman}
+            value={leadsman ? leadsman : ''}
             onChange={this.onChange}
             placeholderOption="Select a Leadsman"
             items={technicians.map(technician => ({
               label: technician.name,
-              value: technician._id
+              value: technician.id
             }))}
-            fieldLabel={this.state.leadsman !== '' && 'Leadsman:'}
+            fieldLabel={leadsman && 'Leadsman:'}
             error={errors.leadsman}
           />
           <SelectListGroup
             name="assistant"
-            value={this.state.assistant}
+            value={assistant ? assistant : ''}
             onChange={this.onChange}
             placeholderOption="Select an Assistant"
             items={this.getAvailableTechnicians().map(technician => ({
               label: technician.name,
-              value: technician._id
+              value: technician.id
             }))}
-            disabled={leadsman === '' ? true : false}
-            fieldLabel={this.state.assistant !== '' && 'Assistant:'}
+            disabled={!leadsman || technicians.length === 1 ? true : false}
+            fieldLabel={assistant && 'Assistant:'}
             error={errors.assistant}
           />
           <SelectListGroup
             name="status"
-            value={leadsman === '' ? 'Unassigned' : this.state.status}
+            value={!leadsman ? 'Unassigned' : this.state.status}
             onChange={this.onChange}
             placeholderOption="Select Ticket Status *"
             items={
@@ -250,7 +242,7 @@ class CreateTicket extends Component {
             <button
               onClick={this.onAddTechniciansClick}
               className="btn btn-secondary mb-3"
-              disabled={this.state.addTechnicians && true}
+              disabled={this.state.addTechnicians}
             >
               Add Technicians
             </button>
@@ -335,7 +327,7 @@ class CreateTicket extends Component {
               <button
                 onClick={this.onAddNumberClick}
                 className="btn btn-secondary btn-block"
-                disabled={this.state.telephone1 === '' && true}
+                disabled={this.state.telephone1 === ''}
               >
                 <i className="fas fa-plus" />
               </button>
@@ -356,7 +348,7 @@ class CreateTicket extends Component {
                 <button
                   onClick={this.onAddNumberClick}
                   className="btn btn-secondary btn-block"
-                  disabled={this.state.telephone2 === '' && true}
+                  disabled={this.state.telephone2 === ''}
                 >
                   <i className="fas fa-plus" />
                 </button>
@@ -428,7 +420,7 @@ class CreateTicket extends Component {
                 name="dB"
                 value={!this.state.tap ? '' : this.state.dB}
                 onChange={this.onChange}
-                disabled={!this.state.tap && true}
+                disabled={!this.state.tap}
                 error={errors.dB}
               />
             </div>
@@ -582,7 +574,7 @@ class CreateTicket extends Component {
               <p className="lead">Select ticket type:</p>
               <div className="btn-group" role="group">
                 <button
-                  onClick={this.onHFCClick}
+                  onClick={() => this.setState({ ticketType: 'HFC' })}
                   className={`btn ${
                     this.state.ticketType === 'HFC'
                       ? 'btn-dark'
@@ -592,7 +584,7 @@ class CreateTicket extends Component {
                   HFC
                 </button>
                 <button
-                  onClick={this.onGPONClick}
+                  onClick={() => this.setState({ ticketType: 'GPON' })}
                   className={`btn ${
                     this.state.ticketType === 'GPON'
                       ? 'btn-dark'

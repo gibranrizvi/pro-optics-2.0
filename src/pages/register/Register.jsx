@@ -5,10 +5,13 @@ import FirebaseContext from '../../firebase/context';
 // Component imports
 import TextFieldGroup from '../../components/text-field-group/TextFieldGroup';
 import SelectListGroup from '../../components/select-list-group/SelectListGroup';
-import { createUserProfileDocument } from '../../firebase/firebase';
+import {
+  createUserProfileDocument,
+  createNewUser
+} from '../../firebase/firebase';
 
 const Register = ({ history }) => {
-  const { currentUser, auth } = React.useContext(FirebaseContext);
+  const { currentUser } = React.useContext(FirebaseContext);
 
   const [values, setValues] = React.useState({
     name: '',
@@ -89,10 +92,7 @@ const Register = ({ history }) => {
     const formattedEmail = email ? email : handle + '@pro-optics.com';
 
     try {
-      const { user } = await auth.createUserWithEmailAndPassword(
-        formattedEmail,
-        password
-      );
+      const user = await createNewUser(formattedEmail, password);
 
       const { uid, email } = user;
 
@@ -102,7 +102,8 @@ const Register = ({ history }) => {
         handle: handle.toLowerCase(),
         role: role.toLowerCase(),
         company: formattedCompany,
-        email
+        email,
+        created_by: currentUser
       };
 
       await createUserProfileDocument(userData);

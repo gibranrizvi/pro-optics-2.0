@@ -39,7 +39,7 @@ const Dashboard = ({ history }) => {
   const getTickets = () => {
     setLoading(true);
 
-    return ticketsRef.orderBy('created', 'desc').onSnapshot(handleSnapshot);
+    return ticketsRef.orderBy('created_at', 'desc').onSnapshot(handleSnapshot);
   };
 
   const handleSnapshot = snapshot => {

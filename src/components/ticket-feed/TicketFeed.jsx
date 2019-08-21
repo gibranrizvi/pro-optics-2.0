@@ -4,7 +4,7 @@ import TicketItem from '../ticket-item/TicketItem';
 
 const TicketFeed = ({ tickets }) => {
   const content = tickets.map(ticket => (
-    <TicketItem key={ticket._id} ticket={ticket} />
+    <TicketItem key={ticket.id} ticket={ticket} />
   ));
 
   return (

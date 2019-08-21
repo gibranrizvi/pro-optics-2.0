@@ -45,13 +45,15 @@ class Tickets extends Component {
   }
 
   getTickets = () => {
-    return this.ticketsRef.orderBy('created', 'desc').onSnapshot(snapshot => {
-      const tickets = snapshot.docs.map(doc => {
-        return { id: doc.id, ...doc.data() };
-      });
+    return this.ticketsRef
+      .orderBy('created_at', 'desc')
+      .onSnapshot(snapshot => {
+        const tickets = snapshot.docs.map(doc => {
+          return { id: doc.id, ...doc.data() };
+        });
 
-      this.setState({ tickets, loading: false });
-    });
+        this.setState({ tickets, loading: false });
+      });
   };
 
   onFilterSelect = filter => {

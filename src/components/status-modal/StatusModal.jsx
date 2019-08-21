@@ -44,7 +44,7 @@ const StatusModal = ({ ticket }) => {
         }
       />
       <button
-        onClick={setModalOpen(false)}
+        onClick={() => setModalOpen(false)}
         className="btn btn-secondary mt-4 mr-2"
       >
         Cancel
@@ -56,7 +56,7 @@ const StatusModal = ({ ticket }) => {
   return (
     <div>
       <button
-        onClick={setModalOpen(true)}
+        onClick={() => setModalOpen(true)}
         className={`btn btn-success btn-sm btn-block mb-2`}
         disabled={ticket.closed}
       >
@@ -64,7 +64,7 @@ const StatusModal = ({ ticket }) => {
       </button>
       <Modal
         isOpen={modalOpen}
-        onRequestClose={setModalOpen(false)}
+        onRequestClose={() => setModalOpen(false)}
         ariaHideApp={false}
         className="Modal"
         overlayClassName="Overlay"
