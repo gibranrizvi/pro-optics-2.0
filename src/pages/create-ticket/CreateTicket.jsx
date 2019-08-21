@@ -112,7 +112,9 @@ class CreateTicket extends Component {
     const ticketData = this.state;
     const { currentUser } = this.context;
 
-    return await createTicketDocument(ticketData, currentUser);
+    createTicketDocument(ticketData, currentUser).then(() =>
+      this.props.history.push('/dashboard')
+    );
   };
 
   onChange = event => {
@@ -168,8 +170,6 @@ class CreateTicket extends Component {
     } = this.state;
     const { currentUser } = this.context;
 
-    console.log({ technicians, leadsman, assistant });
-
     let ticketForm;
     let technicianFields;
 
@@ -199,7 +199,7 @@ class CreateTicket extends Component {
               label: technician.name,
               value: technician.id
             }))}
-            disabled={!leadsman || technicians.length === 1 ? true : false}
+            disabled={!leadsman || technicians.length === 1}
             fieldLabel={assistant && 'Assistant:'}
             error={errors.assistant}
           />

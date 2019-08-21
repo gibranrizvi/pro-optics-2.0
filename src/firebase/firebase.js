@@ -66,7 +66,7 @@ export const createUserProfileDocument = async ({
 
 // Create or update a ticket
 export const createTicketDocument = async (ticketData, currentUser) => {
-  const ticketRef = firestore.doc(`tickets/1`);
+  const ticketRef = firestore.collection(`/tickets/`).doc();
   const snapshot = await ticketRef.get();
 
   const ticketFields = {};

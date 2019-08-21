@@ -38,7 +38,7 @@ const TechnicianModal = ({ ticket }) => {
   };
 
   const getAvailableTechnicians = () => {
-    return technicians.filter(technician => technician.id !== leadsman.id);
+    return technicians.filter(technician => technician.id !== leadsman);
   };
 
   const onSubmit = event => {
@@ -66,7 +66,7 @@ const TechnicianModal = ({ ticket }) => {
         )}
         <SelectListGroup
           name="leadsman"
-          value={leadsman.name}
+          value={leadsman ? leadsman : ''}
           onChange={event => setLeadsman(event.target.value)}
           placeholderOption="Select a Leadsman"
           items={technicians.map(technician => ({
@@ -81,14 +81,14 @@ const TechnicianModal = ({ ticket }) => {
         )}
         <SelectListGroup
           name="assistant"
-          value={assistant.name}
+          value={assistant ? assistant : ''}
           onChange={event => setAssistant(event.target.value)}
           placeholderOption="Select an Assistant"
           items={getAvailableTechnicians().map(technician => ({
             label: technician.name,
             value: technician.id
           }))}
-          disabled={!leadsman ? true : false}
+          disabled={!leadsman || technicians.length === 1}
         />
         <button
           onClick={() => setModalOpen(false)}
