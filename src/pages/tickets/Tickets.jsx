@@ -8,52 +8,12 @@ import Spinner from '../../components/spinner/Spinner';
 // import Navbar2 from '../layout/Navbar2';
 
 class Tickets extends Component {
-  static contextType = FirebaseContext;
-
   state = {
     filter: '',
     date: '',
     dateTerm: '',
     type: '',
-    term: '',
-    loading: false,
-    tickets: this.props.tickets
-  };
-
-  unsubscribe = null;
-  ticketsRef = firestore.collection('/tickets/');
-
-  componentDidMount() {
-    if (!this.state.tickets) {
-      this.setState({ loading: true });
-      this.unsubscribe = this.getTickets();
-    }
-
-    if (!this.context.currentUser) {
-      this.props.history.push('/login');
-    }
-  }
-
-  componentDidUpdate() {
-    if (!this.context.currentUser) {
-      this.props.history.push('/login');
-    }
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
-
-  getTickets = () => {
-    return this.ticketsRef
-      .orderBy('created_at', 'desc')
-      .onSnapshot(snapshot => {
-        const tickets = snapshot.docs.map(doc => {
-          return { id: doc.id, ...doc.data() };
-        });
-
-        this.setState({ tickets, loading: false });
-      });
+    term: ''
   };
 
   onFilterSelect = filter => {
@@ -69,9 +29,8 @@ class Tickets extends Component {
   };
 
   render() {
-    const { tickets, loading } = this.state;
-    const { currentUser } = this.context;
     const { filter, date, dateTerm, type, term } = this.state;
+    const { provider, setProvider, currentUser, tickets } = this.props;
 
     let dateFilters;
     let searchForm;
@@ -212,7 +171,7 @@ class Tickets extends Component {
       </div>
     );
 
-    if (!tickets || loading) {
+    if (!tickets) {
       content = <Spinner />;
     } else {
       switch (filter) {
@@ -289,7 +248,7 @@ class Tickets extends Component {
 
       content = (
         <div>
-          <TicketFeed tickets={results} currentUser={currentUser} />
+          <TicketFeed tickets={results} />
         </div>
       );
     }
@@ -317,8 +276,38 @@ class Tickets extends Component {
               <br />
               {searchForm}
               {dateFilters}
+
+              {currentUser && currentUser.role === 'admin' && (
+                <div className="btn-group" role="group">
+                  <button
+                    onClick={() => setProvider('intv')}
+                    className={`btn ${
+                      provider === 'intv' ? 'btn-dark' : 'btn-secondary'
+                    } mb-3`}
+                  >
+                    Intelvision
+                  </button>
+                  <button
+                    onClick={() => setProvider('airtel')}
+                    className={`btn ${
+                      provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
+                    } mb-3`}
+                  >
+                    Airtel
+                  </button>
+                  <button
+                    onClick={() => setProvider('cws')}
+                    className={`btn ${
+                      provider === 'cws' ? 'btn-dark' : 'btn-secondary'
+                    } mb-3`}
+                  >
+                    Cable &amp; Wireless
+                  </button>
+                </div>
+              )}
+
               <p className="lead text-center pt-4">
-                {loading ? (
+                {!tickets ? (
                   <span>Fetching tickets, one moment please</span>
                 ) : (
                   <span>

@@ -4,6 +4,7 @@ import { FirebaseContext } from '../../firebase/firebase';
 
 // Component imports
 import Dashboard from '../../pages/dashboard/Dashboard';
+import Tickets from '../../pages/tickets/Tickets';
 
 const TicketList = ({ history, location }) => {
   const { currentUser, firestore } = React.useContext(FirebaseContext);
@@ -108,7 +109,7 @@ const TicketList = ({ history, location }) => {
     };
   };
 
-  const renderDashboard = () => {
+  const renderDashboardPage = () => {
     if (provider === 'intv') {
       return (
         <Dashboard
@@ -136,10 +137,41 @@ const TicketList = ({ history, location }) => {
     }
   };
 
-  return isDashboardPage ? (
-    <div className="ticket-list">{renderDashboard()}</div>
-  ) : (
-    <div>Tickets</div>
+  const renderTicketsPage = () => {
+    if (provider === 'intv') {
+      return (
+        <Tickets
+          tickets={intvTickets}
+          provider={provider}
+          setProvider={provider => setProvider(provider)}
+          currentUser={currentUser}
+        />
+      );
+    } else if (provider === 'airtel') {
+      return (
+        <Tickets
+          tickets={airtelTickets}
+          provider={provider}
+          setProvider={provider => setProvider(provider)}
+          currentUser={currentUser}
+        />
+      );
+    } else if (provider === 'cws') {
+      return (
+        <Tickets
+          tickets={cwsTickets}
+          provider={provider}
+          setProvider={provider => setProvider(provider)}
+          currentUser={currentUser}
+        />
+      );
+    }
+  };
+
+  return (
+    <div className="ticket-list">
+      {isDashboardPage ? renderDashboardPage() : renderTicketsPage()}
+    </div>
   );
 };
 
