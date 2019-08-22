@@ -17,7 +17,6 @@ const Dashboard = ({ history }) => {
   const [intvTickets, setIntvTickets] = React.useState(null);
   const [airtelTickets, setAirtelTickets] = React.useState(null);
   const [cwsTickets, setCwsTickets] = React.useState(null);
-  const [tickets, setTickets] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [showAwaiting, setShowAwaiting] = React.useState(false);
   const [showUnassigned, setShowUnassigned] = React.useState(false);
@@ -25,63 +24,123 @@ const Dashboard = ({ history }) => {
   const [showActive, setShowActive] = React.useState(false);
   const [showComplete, setShowComplete] = React.useState(false);
   const [viewToggle, setViewToggle] = React.useState(false);
-  const [provider, setProvider] = React.useState('airtel');
+  const [provider, setProvider] = React.useState('intv');
 
   const intvTicketsRef = firestore.collection(`/providers/intv/tickets/`);
   const airtelTicketsRef = firestore.collection(`/providers/airtel/tickets/`);
   const cwsTicketsRef = firestore.collection(`/providers/cws/tickets/`);
-  const ticketsRef = firestore.collection(`/providers/airtel/tickets/`);
 
   React.useEffect(() => {
     if (!currentUser) {
-      history.push('/login');
-    } else {
-      const unsubscribe = getTickets();
-      return () => unsubscribe();
+      return history.push('/login');
+    }
+
+    const { role, company } = currentUser;
+    if (role === 'admin') {
+      setProvider('intv');
+    } else if (role === 'provider') {
+      switch (company) {
+        case 'intv':
+          setProvider('intv');
+          break;
+        case 'airtel':
+          setProvider('airtel');
+          break;
+        case 'cws':
+          setProvider('cws');
+          break;
+        default:
+          break;
+      }
     }
   }, [currentUser, history]);
+
+  React.useEffect(() => {
+    console.log(provider);
+
+    if (
+      (provider === 'intv' && !intvTickets) ||
+      (provider === 'airtel' && !airtelTickets) ||
+      (provider === 'cws' && !cwsTickets)
+    ) {
+      const {
+        unsubscribeIntv,
+        unsubscribeAirtel,
+        unsubscribeCws
+      } = getTickets();
+
+      return () => {
+        unsubscribeIntv && unsubscribeIntv();
+        unsubscribeAirtel && unsubscribeAirtel();
+        unsubscribeCws && unsubscribeCws();
+      };
+    }
+  }, [provider]);
 
   const getTickets = () => {
     setLoading(true);
 
-    if (currentUser.role === 'admin') {
-      return (
-        ticketsRef
-          .orderBy('created_at', 'desc')
-          // .where('closed', '==', true)
-          .onSnapshot(handleSnapshot)
-      );
-    } else if (currentUser.role === 'provider') {
-      return (
-        ticketsRef
-          .orderBy('created_at', 'desc')
-          // .where('provider', '==', `${currentUser.company}`)
-          .onSnapshot(handleSnapshot)
-      );
+    let unsubscribeIntv, unsubscribeAirtel, unsubscribeCws;
+
+    if (provider === 'intv') {
+      unsubscribeIntv = intvTicketsRef
+        .orderBy('created_at', 'desc')
+        .onSnapshot(snapshot => {
+          const tickets = snapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+          });
+
+          setIntvTickets(tickets);
+          setLoading(false);
+        });
+    } else if (provider === 'airtel') {
+      unsubscribeAirtel = airtelTicketsRef
+        .orderBy('created_at', 'desc')
+        .onSnapshot(snapshot => {
+          const tickets = snapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+          });
+
+          setAirtelTickets(tickets);
+          setLoading(false);
+        });
+    } else if (provider === 'cws') {
+      unsubscribeCws = cwsTicketsRef
+        .orderBy('created_at', 'desc')
+        .onSnapshot(snapshot => {
+          const tickets = snapshot.docs.map(doc => {
+            return { id: doc.id, ...doc.data() };
+          });
+
+          setCwsTickets(tickets);
+          setLoading(false);
+        });
     }
+
+    return {
+      unsubscribeIntv,
+      unsubscribeAirtel,
+      unsubscribeCws
+    };
   };
 
-  const handleSnapshot = snapshot => {
-    const tickets = snapshot.docs.map(doc => {
-      return { id: doc.id, ...doc.data() };
-    });
+  const filterTickets = () => {
+    let tickets;
 
-    setTickets(tickets);
-    setLoading(false);
-  };
+    switch (provider) {
+      case 'intv':
+        tickets = intvTickets;
+        break;
+      case 'airtel':
+        tickets = airtelTickets;
+        break;
+      case 'cws':
+        tickets = cwsTickets;
+        break;
+      default:
+        break;
+    }
 
-  let dashboardContent;
-
-  if (!tickets || loading) {
-    dashboardContent = (
-      <div>
-        <p className="lead text-center mt-4">
-          Fetching tickets, one moment please
-        </p>
-        <Spinner />
-      </div>
-    );
-  } else {
     const awaiting = tickets.filter(
       ticket =>
         (ticket.status === 'Return to Intelvision' ||
@@ -106,6 +165,28 @@ const Dashboard = ({ history }) => {
         !ticket.closed
     );
 
+    return { awaiting, unassigned, pending, active, complete };
+  };
+
+  let dashboardContent;
+
+  if (
+    (provider === 'intv' && !intvTickets) ||
+    (provider === 'airtel' && !airtelTickets) ||
+    (provider === 'cws' && !cwsTickets) ||
+    loading
+  ) {
+    dashboardContent = (
+      <div>
+        <p className="lead text-center mt-4">
+          Fetching tickets, one moment please
+        </p>
+        <Spinner />
+      </div>
+    );
+  } else {
+    const { awaiting, unassigned, pending, active, complete } = filterTickets();
+
     dashboardContent = (
       <div>
         <div>
@@ -123,7 +204,9 @@ const Dashboard = ({ history }) => {
         {currentUser.role === 'admin' && (
           <div className="btn-group" role="group">
             <button
-              onClick={() => setProvider('intv')}
+              onClick={() => {
+                setProvider('intv');
+              }}
               className={`btn ${
                 provider === 'intv' ? 'btn-dark' : 'btn-secondary'
               } mb-4`}
@@ -131,7 +214,9 @@ const Dashboard = ({ history }) => {
               Intelvision
             </button>
             <button
-              onClick={() => setProvider('airtel')}
+              onClick={() => {
+                setProvider('airtel');
+              }}
               className={`btn ${
                 provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
               } mb-4`}
@@ -139,7 +224,9 @@ const Dashboard = ({ history }) => {
               Airtel
             </button>
             <button
-              onClick={() => setProvider('cws')}
+              onClick={() => {
+                setProvider('cws');
+              }}
               className={`btn ${
                 provider === 'cws' ? 'btn-dark' : 'btn-secondary'
               } mb-4`}

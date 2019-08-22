@@ -8,7 +8,7 @@ const useAuth = () => {
     const { unsubscribeFromUserSnapshot, unsubscribe } = getUser();
 
     return () => {
-      unsubscribeFromUserSnapshot();
+      unsubscribeFromUserSnapshot && unsubscribeFromUserSnapshot();
       unsubscribe();
     };
   }, []);
