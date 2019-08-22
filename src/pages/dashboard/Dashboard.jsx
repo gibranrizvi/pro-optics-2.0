@@ -66,7 +66,7 @@ const Dashboard = ({ tickets, provider, setProvider }) => {
           {awaiting.length > 0 ? (
             <p
               className="lead text-center toggle"
-              onClick={() => setShowAwaiting(true)}
+              onClick={() => setShowAwaiting(prevState => !prevState)}
             >
               {showAwaiting ? 'Hide' : 'Show'}
             </p>
@@ -200,7 +200,7 @@ const Dashboard = ({ tickets, provider, setProvider }) => {
           {unassigned.length > 0 ? (
             <p
               className="lead text-center toggle"
-              onClick={() => setShowUnassigned(true)}
+              onClick={() => setShowUnassigned(prevState => !prevState)}
             >
               {showUnassigned ? 'Hide' : 'Show'}
             </p>
@@ -334,7 +334,7 @@ const Dashboard = ({ tickets, provider, setProvider }) => {
           {pending.length > 0 ? (
             <p
               className="lead text-center toggle"
-              onClick={() => setShowPending(true)}
+              onClick={() => setShowPending(prevState => !prevState)}
             >
               {showPending ? 'Hide' : 'Show'}
             </p>
@@ -468,7 +468,7 @@ const Dashboard = ({ tickets, provider, setProvider }) => {
           {active.length > 0 ? (
             <p
               className="lead text-center toggle"
-              onClick={() => setShowActive(true)}
+              onClick={() => setShowActive(prevState => !prevState)}
             >
               {showActive ? 'Hide' : 'Show'}
             </p>
@@ -602,7 +602,7 @@ const Dashboard = ({ tickets, provider, setProvider }) => {
           {complete.length > 0 ? (
             <p
               className="lead text-center toggle"
-              onClick={() => setShowComplete(true)}
+              onClick={() => setShowComplete(prevState => !prevState)}
             >
               {showComplete ? 'Hide' : 'Show'}
             </p>
