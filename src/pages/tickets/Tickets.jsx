@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-import { firestore, FirebaseContext } from '../../firebase/firebase';
-
 import TicketFeed from '../../components/ticket-feed/TicketFeed';
 import Spinner from '../../components/spinner/Spinner';
 // import Navbar2 from '../layout/Navbar2';
@@ -32,8 +30,9 @@ class Tickets extends Component {
     const { filter, date, dateTerm, type, term } = this.state;
     const { provider, setProvider, currentUser, tickets } = this.props;
 
-    let dateFilters;
     let searchForm;
+    let dateFilters;
+    let providerFilters;
     let content;
     let results = [];
 
@@ -130,7 +129,7 @@ class Tickets extends Component {
     );
 
     dateFilters = (
-      <div className="row mb-3">
+      <div className="row">
         <div className="col-md-2" />
         <div className="col-md-8">
           <div className="input-group mb-3">
@@ -168,6 +167,41 @@ class Tickets extends Component {
             />
           </div>
         </div>
+      </div>
+    );
+
+    providerFilters = currentUser && currentUser.role === 'admin' && (
+      <div className="row">
+        <div className="col-md-2" />
+        <div className="col-md-8">
+          <div className="btn-group" role="group">
+            <button
+              onClick={() => setProvider('intv')}
+              className={`btn ${
+                provider === 'intv' ? 'btn-dark' : 'btn-secondary'
+              } mb-3`}
+            >
+              Intelvision
+            </button>
+            <button
+              onClick={() => setProvider('airtel')}
+              className={`btn ${
+                provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
+              } mb-3`}
+            >
+              Airtel
+            </button>
+            <button
+              onClick={() => setProvider('cws')}
+              className={`btn ${
+                provider === 'cws' ? 'btn-dark' : 'btn-secondary'
+              } mb-3`}
+            >
+              Cable &amp; Wireless
+            </button>
+          </div>
+        </div>
+        <div className="col-md-2" />
       </div>
     );
 
@@ -276,35 +310,7 @@ class Tickets extends Component {
               <br />
               {searchForm}
               {dateFilters}
-
-              {currentUser && currentUser.role === 'admin' && (
-                <div className="btn-group" role="group">
-                  <button
-                    onClick={() => setProvider('intv')}
-                    className={`btn ${
-                      provider === 'intv' ? 'btn-dark' : 'btn-secondary'
-                    } mb-3`}
-                  >
-                    Intelvision
-                  </button>
-                  <button
-                    onClick={() => setProvider('airtel')}
-                    className={`btn ${
-                      provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
-                    } mb-3`}
-                  >
-                    Airtel
-                  </button>
-                  <button
-                    onClick={() => setProvider('cws')}
-                    className={`btn ${
-                      provider === 'cws' ? 'btn-dark' : 'btn-secondary'
-                    } mb-3`}
-                  >
-                    Cable &amp; Wireless
-                  </button>
-                </div>
-              )}
+              {providerFilters}
 
               <p className="lead text-center pt-4">
                 {!tickets ? (

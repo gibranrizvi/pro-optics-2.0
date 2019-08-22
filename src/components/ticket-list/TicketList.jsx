@@ -9,14 +9,15 @@ import Tickets from '../../pages/tickets/Tickets';
 const TicketList = ({ history, location }) => {
   const { currentUser, firestore } = React.useContext(FirebaseContext);
 
+  const [tickets, setTickets] = React.useState(null);
   const [intvTickets, setIntvTickets] = React.useState(null);
   const [airtelTickets, setAirtelTickets] = React.useState(null);
   const [cwsTickets, setCwsTickets] = React.useState(null);
-  const [provider, setProvider] = React.useState('intv');
+  const [provider, setProvider] = React.useState(null);
 
-  const intvTicketsRef = firestore.collection(`/providers/intv/tickets/`);
-  const airtelTicketsRef = firestore.collection(`/providers/airtel/tickets/`);
-  const cwsTicketsRef = firestore.collection(`/providers/cws/tickets/`);
+  const openTicketsRef = firestore
+    .collectionGroup('tickets')
+    .where('closed', '==', false);
 
   const isDashboardPage = location.pathname.includes('dashboard');
 
@@ -24,6 +25,8 @@ const TicketList = ({ history, location }) => {
     if (!currentUser) {
       return history.push('/login');
     }
+
+    const unsubscribe = getTickets();
 
     const { role, company } = currentUser;
     if (role === 'admin') {
@@ -43,70 +46,30 @@ const TicketList = ({ history, location }) => {
           break;
       }
     }
+
+    return () => unsubscribe();
   }, [currentUser, history]);
 
   React.useEffect(() => {
-    console.log(provider);
-
-    if (
-      (provider === 'intv' && !intvTickets) ||
-      (provider === 'airtel' && !airtelTickets) ||
-      (provider === 'cws' && !cwsTickets)
-    ) {
-      const {
-        unsubscribeIntv,
-        unsubscribeAirtel,
-        unsubscribeCws
-      } = getTickets();
-
-      return () => {
-        unsubscribeIntv && unsubscribeIntv();
-        unsubscribeAirtel && unsubscribeAirtel();
-        unsubscribeCws && unsubscribeCws();
-      };
+    if (tickets) {
+      setIntvTickets(tickets.filter(ticket => ticket.provider === 'intv'));
+      setAirtelTickets(tickets.filter(ticket => ticket.provider === 'airtel'));
+      setCwsTickets(tickets.filter(ticket => ticket.provider === 'cws'));
     }
-  }, [provider]);
+  }, [tickets]);
 
   const getTickets = () => {
-    let unsubscribeIntv, unsubscribeAirtel, unsubscribeCws;
-
-    if (provider === 'intv') {
-      unsubscribeIntv = intvTicketsRef
-        .orderBy('created_at', 'desc')
-        .onSnapshot(snapshot => {
-          const tickets = snapshot.docs.map(doc => {
-            return { id: doc.id, ...doc.data() };
-          });
-
-          setIntvTickets(tickets);
+    const unsubscribe = openTicketsRef
+      .orderBy('created_at', 'desc')
+      .onSnapshot(snapshot => {
+        const tickets = snapshot.docs.map(doc => {
+          return { id: doc.id, ...doc.data() };
         });
-    } else if (provider === 'airtel') {
-      unsubscribeAirtel = airtelTicketsRef
-        .orderBy('created_at', 'desc')
-        .onSnapshot(snapshot => {
-          const tickets = snapshot.docs.map(doc => {
-            return { id: doc.id, ...doc.data() };
-          });
 
-          setAirtelTickets(tickets);
-        });
-    } else if (provider === 'cws') {
-      unsubscribeCws = cwsTicketsRef
-        .orderBy('created_at', 'desc')
-        .onSnapshot(snapshot => {
-          const tickets = snapshot.docs.map(doc => {
-            return { id: doc.id, ...doc.data() };
-          });
+        setTickets(tickets);
+      });
 
-          setCwsTickets(tickets);
-        });
-    }
-
-    return {
-      unsubscribeIntv,
-      unsubscribeAirtel,
-      unsubscribeCws
-    };
+    return unsubscribe;
   };
 
   const renderDashboardPage = () => {

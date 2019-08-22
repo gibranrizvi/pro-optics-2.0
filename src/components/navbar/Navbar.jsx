@@ -55,10 +55,7 @@ const Navbar = ({ history }) => {
             <div className="dropdown-divider" />
             <button
               className="btn dropdown-item text-right"
-              onClick={() => {
-                auth.signOut();
-                history.push('/login');
-              }}
+              onClick={() => auth.signOut()}
             >
               <i className="fas fa-sign-out-alt" /> Logout
             </button>
@@ -68,10 +65,7 @@ const Navbar = ({ history }) => {
         <li className="nav-item">
           <button
             className="btn nav-button nav-link"
-            onClick={() => {
-              auth.signOut();
-              history.push('/login');
-            }}
+            onClick={() => auth.signOut()}
           >
             <i className="fas fa-sign-out-alt" /> Logout
           </button>
