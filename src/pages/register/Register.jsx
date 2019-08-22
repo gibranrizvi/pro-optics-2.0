@@ -132,9 +132,9 @@ const Register = ({ history }) => {
 
   // Select options for company
   const companyItems = [
-    { label: 'Intelvision', value: 'intelvision' },
+    { label: 'Intelvision', value: 'intv' },
     { label: 'Airtel', value: 'airtel' },
-    { label: 'Cable & Wireless', value: 'cw' },
+    { label: 'Cable & Wireless', value: 'cws' },
     { label: 'Pro Optics', value: 'pro-optics' }
   ];
 

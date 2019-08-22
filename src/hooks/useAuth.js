@@ -5,6 +5,15 @@ const useAuth = () => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    const { unsubscribeFromUserSnapshot, unsubscribe } = getUser();
+
+    return () => {
+      unsubscribeFromUserSnapshot();
+      unsubscribe();
+    };
+  }, []);
+
+  const getUser = () => {
     let unsubscribeFromUserSnapshot;
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
@@ -21,11 +30,8 @@ const useAuth = () => {
       }
     });
 
-    return () => {
-      unsubscribeFromUserSnapshot();
-      unsubscribe();
-    };
-  }, []);
+    return { unsubscribeFromUserSnapshot, unsubscribe };
+  };
 
   return currentUser;
 };

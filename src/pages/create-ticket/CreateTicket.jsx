@@ -29,6 +29,7 @@ class CreateTicket extends Component {
   state = {
     ticketType: '',
     description: '',
+    provider: '',
     addTechnicians: false,
     status: '',
     leadsman: null,
@@ -87,19 +88,25 @@ class CreateTicket extends Component {
 
   componentDidMount() {
     const { currentUser } = this.context;
+
     if (currentUser) {
-      const { role } = currentUser;
+      const { role, company } = currentUser;
+
       if (role === 'technician') {
-        this.props.history.push('/dashboard');
+        return this.props.history.push('/dashboard');
+      }
+
+      if (role === 'provider') {
+        this.setState({ provider: company });
       }
     } else {
-      this.props.history.push('/login');
+      return this.props.history.push('/login');
     }
   }
 
   componentDidUpdate(prevProps) {
     if (!this.context.currentUser) {
-      this.props.history.push('/login');
+      return this.props.history.push('/login');
     }
     if (prevProps.errors !== this.props.errors) {
       this.setState({ errors: this.props.errors });
@@ -170,6 +177,12 @@ class CreateTicket extends Component {
     } = this.state;
     const { currentUser } = this.context;
 
+    const providerItems = [
+      { label: 'Intelvision', value: 'intv' },
+      { label: 'Airtel', value: 'airtel' },
+      { label: 'Cable & Wireless', value: 'cws' }
+    ];
+
     let ticketForm;
     let technicianFields;
 
@@ -225,6 +238,17 @@ class CreateTicket extends Component {
     } else {
       ticketForm = (
         <form onSubmit={this.onSubmit} noValidate>
+          {currentUser.role === 'admin' && (
+            <SelectListGroup
+              name="provider"
+              value={this.state.provider}
+              onChange={this.onChange}
+              placeholderOption="Ticket Provider *"
+              items={providerItems}
+              fieldLabel={this.state.provider !== '' && 'Ticket Provider:'}
+              error={errors.provider}
+            />
+          )}
           <SelectListGroup
             name="description"
             value={this.state.description}

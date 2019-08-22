@@ -14,6 +14,9 @@ import Spinner from '../../components/spinner/Spinner';
 const Dashboard = ({ history }) => {
   const { currentUser, firestore } = React.useContext(FirebaseContext);
 
+  const [intvTickets, setIntvTickets] = React.useState(null);
+  const [airtelTickets, setAirtelTickets] = React.useState(null);
+  const [cwsTickets, setCwsTickets] = React.useState(null);
   const [tickets, setTickets] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [showAwaiting, setShowAwaiting] = React.useState(false);
@@ -22,24 +25,40 @@ const Dashboard = ({ history }) => {
   const [showActive, setShowActive] = React.useState(false);
   const [showComplete, setShowComplete] = React.useState(false);
   const [viewToggle, setViewToggle] = React.useState(false);
+  const [provider, setProvider] = React.useState('airtel');
 
-  const ticketsRef = firestore.collection('/tickets/');
+  const intvTicketsRef = firestore.collection(`/providers/intv/tickets/`);
+  const airtelTicketsRef = firestore.collection(`/providers/airtel/tickets/`);
+  const cwsTicketsRef = firestore.collection(`/providers/cws/tickets/`);
+  const ticketsRef = firestore.collection(`/providers/airtel/tickets/`);
 
   React.useEffect(() => {
     if (!currentUser) {
       history.push('/login');
+    } else {
+      const unsubscribe = getTickets();
+      return () => unsubscribe();
     }
   }, [currentUser, history]);
-
-  React.useEffect(() => {
-    const unsubscribe = getTickets();
-    return () => unsubscribe();
-  }, []);
 
   const getTickets = () => {
     setLoading(true);
 
-    return ticketsRef.orderBy('created_at', 'desc').onSnapshot(handleSnapshot);
+    if (currentUser.role === 'admin') {
+      return (
+        ticketsRef
+          .orderBy('created_at', 'desc')
+          // .where('closed', '==', true)
+          .onSnapshot(handleSnapshot)
+      );
+    } else if (currentUser.role === 'provider') {
+      return (
+        ticketsRef
+          .orderBy('created_at', 'desc')
+          // .where('provider', '==', `${currentUser.company}`)
+          .onSnapshot(handleSnapshot)
+      );
+    }
   };
 
   const handleSnapshot = snapshot => {
@@ -95,11 +114,40 @@ const Dashboard = ({ history }) => {
           )} */}
           <button
             onClick={() => setViewToggle(prevState => !prevState)}
-            className="btn btn-dark mb-3"
+            className="btn btn-dark mb-4"
           >
             Toggle View
           </button>
         </div>
+
+        {currentUser.role === 'admin' && (
+          <div className="btn-group" role="group">
+            <button
+              onClick={() => setProvider('intv')}
+              className={`btn ${
+                provider === 'intv' ? 'btn-dark' : 'btn-secondary'
+              } mb-4`}
+            >
+              Intelvision
+            </button>
+            <button
+              onClick={() => setProvider('airtel')}
+              className={`btn ${
+                provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
+              } mb-4`}
+            >
+              Airtel
+            </button>
+            <button
+              onClick={() => setProvider('cws')}
+              className={`btn ${
+                provider === 'cws' ? 'btn-dark' : 'btn-secondary'
+              } mb-4`}
+            >
+              Cable &amp; Wireless
+            </button>
+          </div>
+        )}
         <br />
 
         <div>
@@ -790,6 +838,7 @@ const Dashboard = ({ history }) => {
         <div className="row">
           <div className="col-md-12">
             {currentUser && <DashboardActions role={currentUser.role} />}
+
             {dashboardContent}
           </div>
         </div>

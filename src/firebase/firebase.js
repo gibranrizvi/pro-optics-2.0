@@ -1,8 +1,9 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
-import FirebaseContext from './context';
+import { format } from 'date-fns';
 
+import FirebaseContext from './context';
 import { firebaseConfig } from '../config/config';
 
 const secondaryApp = firebase.initializeApp(firebaseConfig, 'Secondary');
@@ -66,17 +67,28 @@ export const createUserProfileDocument = async ({
 
 // Create or update a ticket
 export const createTicketDocument = async (ticketData, currentUser) => {
-  const ticketRef = firestore.collection(`/tickets/`).doc();
-  const snapshot = await ticketRef.get();
+  const providerDocRef = firestore.doc(`/providers/${ticketData.provider}`);
+  const providerRef = await providerDocRef.get();
+  const { counter } = providerRef.data();
+
+  const currentYear = format(new Date(), 'YYYY');
+
+  const ticketsCollectionRef = providerDocRef.collection(`tickets`);
+  const ticketDocRef = ticketsCollectionRef.doc(
+    `${currentYear}-${counter + 1}`
+  );
+  const snapshot = await ticketDocRef.get();
 
   const ticketFields = {};
   ticketFields.endUserInfo = {};
   ticketFields.networkInfo = {};
   ticketFields.equipment = {};
   ticketFields.comments = [];
+  ticketFields.closed = false;
 
   const standardFields = [
     'ticketType',
+    'provider',
     'description',
     'tvPackage',
     'internetPackage'
@@ -165,26 +177,33 @@ export const createTicketDocument = async (ticketData, currentUser) => {
   }
 
   if (!snapshot.exists) {
-    // Create new user
+    // Create new ticket
     const created_at = new Date();
     const created_by = currentUser;
 
     try {
-      await ticketRef.set({
-        ...ticketFields,
-        created_at,
-        created_by
-      });
+      ticketDocRef
+        .set({
+          ...ticketFields,
+          created_at,
+          created_by
+        })
+        .then(
+          async () =>
+            await providerDocRef.update({
+              counter: counter + 1
+            })
+        );
     } catch (error) {
       console.log(error.message);
     }
   } else {
-    // Update user
+    // Update ticket
     const last_updated_at = new Date();
     const last_updated_by = currentUser;
 
     try {
-      await ticketRef.update({
+      await ticketDocRef.update({
         last_updated_at,
         last_updated_by
       });
@@ -193,7 +212,7 @@ export const createTicketDocument = async (ticketData, currentUser) => {
     }
   }
 
-  return ticketRef;
+  return ticketDocRef;
 };
 
 firebase.initializeApp(firebaseConfig);
