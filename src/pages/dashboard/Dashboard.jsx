@@ -173,8 +173,7 @@ const Dashboard = ({ history }) => {
   if (
     (provider === 'intv' && !intvTickets) ||
     (provider === 'airtel' && !airtelTickets) ||
-    (provider === 'cws' && !cwsTickets) ||
-    loading
+    (provider === 'cws' && !cwsTickets)
   ) {
     dashboardContent = (
       <div>
@@ -189,54 +188,6 @@ const Dashboard = ({ history }) => {
 
     dashboardContent = (
       <div>
-        <div>
-          {/* TODO {currentUser.role !== 'technician' && (
-            <DownloadReportModal tickets={tickets} />
-          )} */}
-          <button
-            onClick={() => setViewToggle(prevState => !prevState)}
-            className="btn btn-dark mb-4"
-          >
-            Toggle View
-          </button>
-        </div>
-
-        {currentUser.role === 'admin' && (
-          <div className="btn-group" role="group">
-            <button
-              onClick={() => {
-                setProvider('intv');
-              }}
-              className={`btn ${
-                provider === 'intv' ? 'btn-dark' : 'btn-secondary'
-              } mb-4`}
-            >
-              Intelvision
-            </button>
-            <button
-              onClick={() => {
-                setProvider('airtel');
-              }}
-              className={`btn ${
-                provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
-              } mb-4`}
-            >
-              Airtel
-            </button>
-            <button
-              onClick={() => {
-                setProvider('cws');
-              }}
-              className={`btn ${
-                provider === 'cws' ? 'btn-dark' : 'btn-secondary'
-              } mb-4`}
-            >
-              Cable &amp; Wireless
-            </button>
-          </div>
-        )}
-        <br />
-
         <div>
           <h3 className="display-5 text-center mb-4">
             Awaiting Action by Provider ({awaiting.length})
@@ -925,7 +876,53 @@ const Dashboard = ({ history }) => {
         <div className="row">
           <div className="col-md-12">
             {currentUser && <DashboardActions role={currentUser.role} />}
+            <div>
+              {/* TODO {currentUser.role !== 'technician' && (
+            <DownloadReportModal tickets={tickets} />
+          )} */}
+              <button
+                onClick={() => setViewToggle(prevState => !prevState)}
+                className="btn btn-dark mb-4"
+              >
+                Toggle View
+              </button>
+            </div>
 
+            {currentUser && currentUser.role === 'admin' && (
+              <div className="btn-group" role="group">
+                <button
+                  onClick={() => {
+                    setProvider('intv');
+                  }}
+                  className={`btn ${
+                    provider === 'intv' ? 'btn-dark' : 'btn-secondary'
+                  } mb-4`}
+                >
+                  Intelvision
+                </button>
+                <button
+                  onClick={() => {
+                    setProvider('airtel');
+                  }}
+                  className={`btn ${
+                    provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
+                  } mb-4`}
+                >
+                  Airtel
+                </button>
+                <button
+                  onClick={() => {
+                    setProvider('cws');
+                  }}
+                  className={`btn ${
+                    provider === 'cws' ? 'btn-dark' : 'btn-secondary'
+                  } mb-4`}
+                >
+                  Cable &amp; Wireless
+                </button>
+              </div>
+            )}
+            <br />
             {dashboardContent}
           </div>
         </div>
