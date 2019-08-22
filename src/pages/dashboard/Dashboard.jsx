@@ -11,136 +11,28 @@ import DashboardActions from '../../components/dashboard-actions/DashboardAction
 import TicketFeed from '../../components/ticket-feed/TicketFeed';
 import Spinner from '../../components/spinner/Spinner';
 
-const Dashboard = ({ history }) => {
-  const { currentUser, firestore } = React.useContext(FirebaseContext);
+const Dashboard = ({ tickets, provider, setProvider }) => {
+  const { currentUser } = React.useContext(FirebaseContext);
 
-  const [intvTickets, setIntvTickets] = React.useState(null);
-  const [airtelTickets, setAirtelTickets] = React.useState(null);
-  const [cwsTickets, setCwsTickets] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
   const [showAwaiting, setShowAwaiting] = React.useState(false);
   const [showUnassigned, setShowUnassigned] = React.useState(false);
   const [showPending, setShowPending] = React.useState(false);
   const [showActive, setShowActive] = React.useState(false);
   const [showComplete, setShowComplete] = React.useState(false);
   const [viewToggle, setViewToggle] = React.useState(false);
-  const [provider, setProvider] = React.useState('intv');
 
-  const intvTicketsRef = firestore.collection(`/providers/intv/tickets/`);
-  const airtelTicketsRef = firestore.collection(`/providers/airtel/tickets/`);
-  const cwsTicketsRef = firestore.collection(`/providers/cws/tickets/`);
+  let dashboardContent;
 
-  React.useEffect(() => {
-    if (!currentUser) {
-      return history.push('/login');
-    }
-
-    const { role, company } = currentUser;
-    if (role === 'admin') {
-      setProvider('intv');
-    } else if (role === 'provider') {
-      switch (company) {
-        case 'intv':
-          setProvider('intv');
-          break;
-        case 'airtel':
-          setProvider('airtel');
-          break;
-        case 'cws':
-          setProvider('cws');
-          break;
-        default:
-          break;
-      }
-    }
-  }, [currentUser, history]);
-
-  React.useEffect(() => {
-    console.log(provider);
-
-    if (
-      (provider === 'intv' && !intvTickets) ||
-      (provider === 'airtel' && !airtelTickets) ||
-      (provider === 'cws' && !cwsTickets)
-    ) {
-      const {
-        unsubscribeIntv,
-        unsubscribeAirtel,
-        unsubscribeCws
-      } = getTickets();
-
-      return () => {
-        unsubscribeIntv && unsubscribeIntv();
-        unsubscribeAirtel && unsubscribeAirtel();
-        unsubscribeCws && unsubscribeCws();
-      };
-    }
-  }, [provider]);
-
-  const getTickets = () => {
-    setLoading(true);
-
-    let unsubscribeIntv, unsubscribeAirtel, unsubscribeCws;
-
-    if (provider === 'intv') {
-      unsubscribeIntv = intvTicketsRef
-        .orderBy('created_at', 'desc')
-        .onSnapshot(snapshot => {
-          const tickets = snapshot.docs.map(doc => {
-            return { id: doc.id, ...doc.data() };
-          });
-
-          setIntvTickets(tickets);
-          setLoading(false);
-        });
-    } else if (provider === 'airtel') {
-      unsubscribeAirtel = airtelTicketsRef
-        .orderBy('created_at', 'desc')
-        .onSnapshot(snapshot => {
-          const tickets = snapshot.docs.map(doc => {
-            return { id: doc.id, ...doc.data() };
-          });
-
-          setAirtelTickets(tickets);
-          setLoading(false);
-        });
-    } else if (provider === 'cws') {
-      unsubscribeCws = cwsTicketsRef
-        .orderBy('created_at', 'desc')
-        .onSnapshot(snapshot => {
-          const tickets = snapshot.docs.map(doc => {
-            return { id: doc.id, ...doc.data() };
-          });
-
-          setCwsTickets(tickets);
-          setLoading(false);
-        });
-    }
-
-    return {
-      unsubscribeIntv,
-      unsubscribeAirtel,
-      unsubscribeCws
-    };
-  };
-
-  const filterTickets = () => {
-    let tickets;
-
-    switch (provider) {
-      case 'intv':
-        tickets = intvTickets;
-        break;
-      case 'airtel':
-        tickets = airtelTickets;
-        break;
-      case 'cws':
-        tickets = cwsTickets;
-        break;
-      default:
-        break;
-    }
-
+  if (!tickets) {
+    dashboardContent = (
+      <div>
+        <p className="lead text-center mt-4">
+          Fetching tickets, one moment please
+        </p>
+        <Spinner />
+      </div>
+    );
+  } else {
     const awaiting = tickets.filter(
       ticket =>
         (ticket.status === 'Return to Intelvision' ||
@@ -164,27 +56,6 @@ const Dashboard = ({ history }) => {
           ticket.status === 'Complete to activate at a later date') &&
         !ticket.closed
     );
-
-    return { awaiting, unassigned, pending, active, complete };
-  };
-
-  let dashboardContent;
-
-  if (
-    (provider === 'intv' && !intvTickets) ||
-    (provider === 'airtel' && !airtelTickets) ||
-    (provider === 'cws' && !cwsTickets)
-  ) {
-    dashboardContent = (
-      <div>
-        <p className="lead text-center mt-4">
-          Fetching tickets, one moment please
-        </p>
-        <Spinner />
-      </div>
-    );
-  } else {
-    const { awaiting, unassigned, pending, active, complete } = filterTickets();
 
     dashboardContent = (
       <div>
@@ -891,9 +762,7 @@ const Dashboard = ({ history }) => {
             {currentUser && currentUser.role === 'admin' && (
               <div className="btn-group" role="group">
                 <button
-                  onClick={() => {
-                    setProvider('intv');
-                  }}
+                  onClick={() => setProvider('intv')}
                   className={`btn ${
                     provider === 'intv' ? 'btn-dark' : 'btn-secondary'
                   } mb-4`}
@@ -901,9 +770,7 @@ const Dashboard = ({ history }) => {
                   Intelvision
                 </button>
                 <button
-                  onClick={() => {
-                    setProvider('airtel');
-                  }}
+                  onClick={() => setProvider('airtel')}
                   className={`btn ${
                     provider === 'airtel' ? 'btn-dark' : 'btn-secondary'
                   } mb-4`}
@@ -911,9 +778,7 @@ const Dashboard = ({ history }) => {
                   Airtel
                 </button>
                 <button
-                  onClick={() => {
-                    setProvider('cws');
-                  }}
+                  onClick={() => setProvider('cws')}
                   className={`btn ${
                     provider === 'cws' ? 'btn-dark' : 'btn-secondary'
                   } mb-4`}

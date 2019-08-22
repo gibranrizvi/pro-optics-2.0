@@ -188,11 +188,10 @@ export const createTicketDocument = async (ticketData, currentUser) => {
           created_at,
           created_by
         })
-        .then(
-          async () =>
-            await providerDocRef.update({
-              counter: counter + 1
-            })
+        .then(() =>
+          providerDocRef.update({
+            counter: counter + 1
+          })
         );
     } catch (error) {
       console.log(error.message);

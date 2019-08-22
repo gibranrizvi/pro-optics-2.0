@@ -17,7 +17,7 @@ class Tickets extends Component {
     type: '',
     term: '',
     loading: false,
-    tickets: null
+    tickets: this.props.tickets
   };
 
   unsubscribe = null;
