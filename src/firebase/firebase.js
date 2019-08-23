@@ -74,10 +74,15 @@ export const createTicketDocument = async (ticketData, currentUser) => {
   const currentYear = format(new Date(), 'YYYY');
 
   const ticketsCollectionRef = providerDocRef.collection(`tickets`);
-  const ticketDocRef = ticketsCollectionRef.doc(
-    `${currentYear}-${counter + 1}`
-  );
-  const snapshot = await ticketDocRef.get();
+
+  let uid;
+  if (!ticketData.uid) {
+    uid = `${currentYear}-${counter + 1}`;
+  } else {
+    uid = ticketData.uid;
+  }
+
+  const ticketDocRef = ticketsCollectionRef.doc(`${uid}`);
 
   const ticketFields = {};
   ticketFields.endUserInfo = {};
@@ -176,6 +181,8 @@ export const createTicketDocument = async (ticketData, currentUser) => {
     ticketFields.status = 'Unassigned';
   }
 
+  const snapshot = await ticketDocRef.get();
+
   if (!snapshot.exists) {
     // Create new ticket
     const created_at = new Date();
@@ -203,6 +210,7 @@ export const createTicketDocument = async (ticketData, currentUser) => {
 
     try {
       await ticketDocRef.update({
+        ...ticketFields,
         last_updated_at,
         last_updated_by
       });

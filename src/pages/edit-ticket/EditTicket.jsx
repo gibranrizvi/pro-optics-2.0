@@ -25,6 +25,7 @@ class EditTicket extends Component {
   state = {
     ticketLoading: false,
     ticketType: '',
+    provider: '',
     description: '',
     tvPackage: '',
     internetPackage: '',
@@ -75,7 +76,30 @@ class EditTicket extends Component {
   };
 
   componentDidMount() {
-    this.getTicket();
+    const { currentUser } = this.context;
+    const { match, history } = this.props;
+
+    if (currentUser) {
+      this.getTicket();
+
+      const { role, company } = currentUser;
+
+      if (role === 'technician') {
+        return history.push('/dashboard');
+      }
+
+      if (role === 'provider' && match.params.provider !== company) {
+        return history.push('/dashboard');
+      }
+    } else {
+      return history.push('/login');
+    }
+  }
+
+  componentDidUpdate() {
+    if (!this.context.currentUser) {
+      return this.props.history.push('/login');
+    }
   }
 
   getTicket = async () => {
@@ -94,6 +118,7 @@ class EditTicket extends Component {
 
       const {
         ticketType = '',
+        provider = '',
         description = '',
         tvPackage = '',
         internetPackage = '',
@@ -151,6 +176,7 @@ class EditTicket extends Component {
       this.setState({
         ticketLoading: false,
         ticketType,
+        provider,
         description,
         tvPackage,
         internetPackage,
@@ -203,36 +229,19 @@ class EditTicket extends Component {
     }
   };
 
-  componentDidUpdate(prevProps) {
-    const { currentUser } = this.context;
-    const { match, history } = this.props;
-
-    if (currentUser) {
-      const { role, company } = currentUser;
-
-      if (role === 'technician') {
-        return history.push('/dashboard');
-      }
-
-      if (role === 'provider' && match.params.provider !== company) {
-        return history.push('/dashboard');
-      }
-    } else {
-      return this.props.history.push('/login');
-    }
-  }
-
   onSubmit = event => {
     event.preventDefault();
 
-    const newTicket = this.state;
+    const ticketData = this.state;
+    ticketData.uid = this.props.match.params.id;
 
-    // TODO
-    // this.props.updateTicket(
-    //   this.props.ticket.ticket._id,
-    //   newTicket,
-    //   this.props.history
-    // );
+    const { currentUser } = this.context;
+
+    createTicketDocument(ticketData, currentUser).then(() =>
+      this.props.history.push(
+        `/ticket/${ticketData.provider}/${ticketData.uid}`
+      )
+    );
   };
 
   onChange = event => {

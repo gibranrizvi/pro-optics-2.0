@@ -89,16 +89,19 @@ class CreateTicket extends Component {
 
   componentDidMount() {
     const { currentUser } = this.context;
+    const { history } = this.props;
+
     if (currentUser) {
       const { role, company } = currentUser;
+
       if (role === 'technician') {
-        return this.props.history.push('/dashboard');
+        return history.push('/dashboard');
       }
       if (role === 'provider') {
         this.setState({ provider: company });
       }
     } else {
-      return this.props.history.push('/login');
+      return history.push('/login');
     }
   }
 
