@@ -15,7 +15,8 @@ const TicketItem = ({ ticket }) => {
   const [showAll, setShowAll] = React.useState(false);
 
   const {
-    _id,
+    id,
+    provider,
     closed,
     closedAt,
     createdAt,
@@ -35,10 +36,10 @@ const TicketItem = ({ ticket }) => {
       <div className="row">
         <div className="col-lg-2">
           <Link
-            to={`/ticket/${_id}`}
+            to={`/ticket/${provider}/${id}`}
             className="btn btn-primary btn-sm btn-block mb-2"
           >
-            INTV {_id}
+            INTV {id}
           </Link>
           <p className="text-muted text-center">
             <strong>{!closed ? 'OPEN' : 'CLOSED'}</strong>
@@ -195,7 +196,7 @@ const TicketItem = ({ ticket }) => {
               )}
               {currentUser.role !== 'technician' && (
                 <Link
-                  to={`/edit-ticket/${ticket._id}`}
+                  to={`/edit-ticket/${provider}/${id}`}
                   className="btn btn-info btn-sm btn-block mb-2"
                 >
                   Edit Ticket
@@ -207,7 +208,7 @@ const TicketItem = ({ ticket }) => {
                   <button
                     onClick={() =>
                       // TODO
-                      //updateStatus(ticket._id, { status: 'Issued' })
+                      //updateStatus(ticket.id, { status: 'Issued' })
                       console.log('Update status to issued')
                     }
                     className="btn btn-success btn-sm btn-block mb-2"

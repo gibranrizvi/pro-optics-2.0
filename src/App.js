@@ -16,6 +16,7 @@ import Landing from './pages/landing/Landing';
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
 import CreateTicket from './pages/create-ticket/CreateTicket';
+import EditTicket from './pages/edit-ticket/EditTicket';
 
 // Component imports
 import TicketList from './components/ticket-list/TicketList';
@@ -40,6 +41,11 @@ const App = () => {
               component={TicketList}
             />
             <Route exact path="/create-ticket" component={CreateTicket} />
+            <Route
+              exact
+              path="/edit-ticket/:provider/:id"
+              component={EditTicket}
+            />
           </Switch>
         </div>
         <Footer />

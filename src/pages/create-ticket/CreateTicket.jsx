@@ -5,6 +5,7 @@ import {
   FirebaseContext,
   createTicketDocument
 } from '../../firebase/firebase';
+
 import {
   statusOptions,
   descriptionOptionsHFC,
@@ -88,14 +89,11 @@ class CreateTicket extends Component {
 
   componentDidMount() {
     const { currentUser } = this.context;
-
     if (currentUser) {
       const { role, company } = currentUser;
-
       if (role === 'technician') {
         return this.props.history.push('/dashboard');
       }
-
       if (role === 'provider') {
         this.setState({ provider: company });
       }
@@ -104,12 +102,9 @@ class CreateTicket extends Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     if (!this.context.currentUser) {
       return this.props.history.push('/login');
-    }
-    if (prevProps.errors !== this.props.errors) {
-      this.setState({ errors: this.props.errors });
     }
   }
 

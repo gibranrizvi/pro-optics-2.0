@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 
-import Spinner from '../common/Spinner';
-import TextFieldGroup from '../common/TextFieldGroup';
-import SelectListGroup from '../common/SelectListGroup';
-import EquipmentFieldGroup from '../common/EquipmentFieldGroup';
+import {
+  firestore,
+  FirebaseContext,
+  createTicketDocument
+} from '../../firebase/firebase';
 
 import {
   descriptionOptionsHFC,
@@ -12,8 +13,17 @@ import {
   internetPackageOptions
 } from '../../utils/select-lists';
 
+// Component imports
+import Spinner from '../../components/spinner/Spinner';
+import EquipmentFieldGroup from '../../components/equipment-field-group/EquipmentFieldGroup';
+import SelectListGroup from '../../components/select-list-group/SelectListGroup';
+import TextFieldGroup from '../../components/text-field-group/TextFieldGroup';
+
 class EditTicket extends Component {
+  static contextType = FirebaseContext;
+
   state = {
+    ticketLoading: false,
     ticketType: '',
     description: '',
     tvPackage: '',
@@ -65,27 +75,23 @@ class EditTicket extends Component {
   };
 
   componentDidMount() {
-    const { role } = this.props.auth.currentUser;
-    if (role === 'technician') {
-      this.props.history.push('/dashboard');
-    } else {
-      this.props.getTicket(this.props.match.params.id);
-    }
+    this.getTicket();
   }
 
-  componentDidUpdate(prevProps) {
-    const { ticket } = this.props.ticket;
+  getTicket = async () => {
+    this.setState({ ticketLoading: true });
 
-    if (ticket === null && prevProps.ticket.ticketLoading) {
-      this.props.history.push('/not-found');
-    }
+    const ticketRef = firestore.doc(
+      `/providers/${this.props.match.params.provider}/tickets/${
+        this.props.match.params.id
+      }`
+    );
 
-    if (prevProps.errors !== this.props.errors) {
-      this.setState({ errors: this.props.errors });
-    }
+    const snapshot = await ticketRef.get();
+    if (snapshot.exists) {
+      const ticket = snapshot.data();
+      console.log(ticket);
 
-    if (ticket) {
-      // if a ticket field does not exist, set it to empty string
       const {
         ticketType = '',
         description = '',
@@ -142,57 +148,77 @@ class EditTicket extends Component {
         } = {}
       } = ticket;
 
-      if (prevProps.ticket !== this.props.ticket) {
-        this.setState({
-          ticketType,
-          description,
-          tvPackage,
-          internetPackage,
-          name,
-          id,
-          nin,
-          address,
-          parcelNumber,
-          telephone1,
-          telephone2,
-          telephone3,
-          email,
-          nodeLocation,
-          tnaLocation,
-          le,
-          tap,
-          dB,
-          psLocation,
-          hubLocation,
-          phone,
-          phoneMac,
-          phoneSerial,
-          iptv,
-          iptvMac,
-          iptvSerial,
-          vod,
-          vodMac,
-          vodSerial,
-          dualView,
-          dualViewMac,
-          dualViewSerial,
-          stbPet,
-          stbPetMac,
-          stbPetSerial,
-          stbNeta,
-          stbNetaMac,
-          stbNetaSerial,
-          ont2426,
-          ont2426Mac,
-          ont2426Serial,
-          ont2424,
-          ont2424Mac,
-          ont2424Serial,
-          technoColour,
-          technoColourMac,
-          technoColourSerial
-        });
+      this.setState({
+        ticketLoading: false,
+        ticketType,
+        description,
+        tvPackage,
+        internetPackage,
+        name,
+        id,
+        nin,
+        address,
+        parcelNumber,
+        telephone1,
+        telephone2,
+        telephone3,
+        email,
+        nodeLocation,
+        tnaLocation,
+        le,
+        tap,
+        dB,
+        psLocation,
+        hubLocation,
+        phone,
+        phoneMac,
+        phoneSerial,
+        iptv,
+        iptvMac,
+        iptvSerial,
+        vod,
+        vodMac,
+        vodSerial,
+        dualView,
+        dualViewMac,
+        dualViewSerial,
+        stbPet,
+        stbPetMac,
+        stbPetSerial,
+        stbNeta,
+        stbNetaMac,
+        stbNetaSerial,
+        ont2426,
+        ont2426Mac,
+        ont2426Serial,
+        ont2424,
+        ont2424Mac,
+        ont2424Serial,
+        technoColour,
+        technoColourMac,
+        technoColourSerial
+      });
+    } else {
+      this.props.history.push('/not-found');
+    }
+  };
+
+  componentDidUpdate(prevProps) {
+    const { currentUser } = this.context;
+    const { match, history } = this.props;
+
+    if (currentUser) {
+      const { role, company } = currentUser;
+
+      if (role === 'technician') {
+        return history.push('/dashboard');
       }
+
+      if (role === 'provider' && match.params.provider !== company) {
+        return history.push('/dashboard');
+      }
+    } else {
+      return this.props.history.push('/login');
     }
   }
 
@@ -201,11 +227,12 @@ class EditTicket extends Component {
 
     const newTicket = this.state;
 
-    this.props.updateTicket(
-      this.props.ticket.ticket._id,
-      newTicket,
-      this.props.history
-    );
+    // TODO
+    // this.props.updateTicket(
+    //   this.props.ticket.ticket._id,
+    //   newTicket,
+    //   this.props.history
+    // );
   };
 
   onChange = event => {
@@ -217,17 +244,8 @@ class EditTicket extends Component {
     this.setState({ [name]: !this.state[name] });
   };
 
-  onHFCClick = event => {
-    this.setState({ ticketType: 'HFC' });
-  };
-
-  onGPONClick = event => {
-    this.setState({ ticketType: 'GPON' });
-  };
-
   render() {
-    const { errors, ticketType } = this.state;
-    const { ticket, ticketLoading } = this.props.ticket;
+    const { ticket, ticketLoading, errors, ticketType } = this.state;
 
     let ticketForm;
 
@@ -567,7 +585,7 @@ class EditTicket extends Component {
                   <p className="lead">Change ticket type:</p>
                   <div className="btn-group" role="group">
                     <button
-                      onClick={this.onHFCClick}
+                      onClick={() => this.setState({ ticketType: 'HFC' })}
                       className={`btn ${
                         this.state.ticketType === 'HFC'
                           ? 'btn-dark'
@@ -577,7 +595,7 @@ class EditTicket extends Component {
                       HFC
                     </button>
                     <button
-                      onClick={this.onGPONClick}
+                      onClick={() => this.setState({ ticketType: 'GPON' })}
                       className={`btn ${
                         this.state.ticketType === 'GPON'
                           ? 'btn-dark'
