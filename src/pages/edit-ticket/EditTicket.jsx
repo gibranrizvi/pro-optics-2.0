@@ -30,7 +30,7 @@ class EditTicket extends Component {
     tvPackage: '',
     internetPackage: '',
     name: '',
-    id: '',
+    accountNumber: '',
     nin: '',
     address: '',
     parcelNumber: '',
@@ -124,7 +124,7 @@ class EditTicket extends Component {
         internetPackage = '',
         endUserInfo: {
           name = '',
-          id = '',
+          accountNumber = '',
           nin = '',
           address = '',
           parcelNumber = '',
@@ -181,7 +181,7 @@ class EditTicket extends Component {
         tvPackage,
         internetPackage,
         name,
-        id,
+        accountNumber,
         nin,
         address,
         parcelNumber,
@@ -235,6 +235,14 @@ class EditTicket extends Component {
     const ticketData = this.state;
     ticketData.uid = this.props.match.params.id;
 
+    const { description } = this.state;
+
+    if (!description) {
+      return this.setState({
+        errors: { description: 'Please select a description' }
+      });
+    }
+
     const { currentUser } = this.context;
 
     createTicketDocument(ticketData, currentUser).then(() =>
@@ -261,9 +269,9 @@ class EditTicket extends Component {
     if (ticket === null || ticketLoading) {
       ticketForm = <Spinner />;
     } else {
-      if (ticketType !== '') {
+      if (ticketType) {
         ticketForm = (
-          <form onSubmit={this.onSubmit} noValidate>
+          <form onSubmit={this.onSubmit}>
             <SelectListGroup
               name="description"
               value={this.state.description}
@@ -278,6 +286,7 @@ class EditTicket extends Component {
                 this.state.description !== '' && 'Ticket Description:'
               }
               error={errors.description}
+              required
             />
             <SelectListGroup
               name="tvPackage"
@@ -308,14 +317,16 @@ class EditTicket extends Component {
               onChange={this.onChange}
               label={this.state.name !== '' && 'Customer Name:'}
               error={errors.name}
+              required
             />
             <TextFieldGroup
-              placeholder="Customer ID *"
-              name="id"
-              value={this.state.id}
+              placeholder="Account Number *"
+              name="accountNumber"
+              value={this.state.accountNumber}
               onChange={this.onChange}
-              label={this.state.id !== '' && 'Customer ID:'}
-              error={errors.id}
+              label={this.state.accountNumber !== '' && 'Account Number:'}
+              error={errors.accountNumber}
+              required
             />
             <TextFieldGroup
               placeholder="NIN *"
@@ -324,6 +335,7 @@ class EditTicket extends Component {
               onChange={this.onChange}
               label={this.state.nin !== '' && 'NIN:'}
               error={errors.nin}
+              required
             />
             <TextFieldGroup
               placeholder="Address *"
@@ -332,6 +344,7 @@ class EditTicket extends Component {
               onChange={this.onChange}
               label={this.state.address !== '' && 'Address:'}
               error={errors.address}
+              required
             />
             <TextFieldGroup
               placeholder="Parcel Number *"
@@ -340,16 +353,18 @@ class EditTicket extends Component {
               onChange={this.onChange}
               label={this.state.parcelNumber !== '' && 'Parcel Number:'}
               error={errors.parcelNumber}
+              required
             />
             <label className="text-muted">Telephone Number(s):</label>
             <div className="row">
               <div className="col-10">
                 <TextFieldGroup
-                  placeholder="Telephone"
+                  placeholder="Telephone *"
                   name="telephone1"
                   value={this.state.telephone1}
                   onChange={this.onChange}
                   error={errors.telephone1}
+                  required
                 />
               </div>
               <div className="col-2">
@@ -594,7 +609,9 @@ class EditTicket extends Component {
                   <p className="lead">Change ticket type:</p>
                   <div className="btn-group" role="group">
                     <button
-                      onClick={() => this.setState({ ticketType: 'HFC' })}
+                      onClick={() =>
+                        this.setState({ ticketType: 'HFC', description: '' })
+                      }
                       className={`btn ${
                         this.state.ticketType === 'HFC'
                           ? 'btn-dark'
@@ -604,7 +621,9 @@ class EditTicket extends Component {
                       HFC
                     </button>
                     <button
-                      onClick={() => this.setState({ ticketType: 'GPON' })}
+                      onClick={() =>
+                        this.setState({ ticketType: 'GPON', description: '' })
+                      }
                       className={`btn ${
                         this.state.ticketType === 'GPON'
                           ? 'btn-dark'

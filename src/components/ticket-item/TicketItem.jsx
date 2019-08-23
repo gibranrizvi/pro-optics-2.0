@@ -39,7 +39,7 @@ const TicketItem = ({ ticket }) => {
             to={`/ticket/${provider}/${id}`}
             className="btn btn-primary btn-sm btn-block mb-2"
           >
-            INTV {id}
+            {provider} {id}
           </Link>
           <p className="text-muted text-center">
             <strong>{!closed ? 'OPEN' : 'CLOSED'}</strong>
@@ -151,7 +151,8 @@ const TicketItem = ({ ticket }) => {
         <div className="col-lg-4">
           {showAll ? (
             <p className="text-muted">
-              Account ID: <strong>{ticket.endUserInfo.id}</strong>
+              Account Number:{' '}
+              <strong>{ticket.endUserInfo.accountNumber}</strong>
               <br />
               Customer Name: <strong>{ticket.endUserInfo.name}</strong>
               <br />
@@ -177,7 +178,8 @@ const TicketItem = ({ ticket }) => {
             </p>
           ) : (
             <p className="text-muted">
-              Account ID: <strong>{ticket.endUserInfo.id}</strong>
+              Account Number:{' '}
+              <strong>{ticket.endUserInfo.accountNumber}</strong>
               <br />
               Customer Name: <strong>{ticket.endUserInfo.name}</strong>
               <br />

@@ -101,7 +101,7 @@ export const createTicketDocument = async (ticketData, currentUser) => {
 
   const endUserInfoFields = [
     'name',
-    'id',
+    'accountNumber',
     'nin',
     'address',
     'parcelNumber',

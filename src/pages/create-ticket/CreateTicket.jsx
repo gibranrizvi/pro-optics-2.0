@@ -38,7 +38,7 @@ class CreateTicket extends Component {
     tvPackage: '',
     internetPackage: '',
     name: '',
-    id: '',
+    accountNumber: '',
     nin: '',
     address: '',
     parcelNumber: '',
@@ -115,6 +115,18 @@ class CreateTicket extends Component {
     event.preventDefault();
 
     const ticketData = this.state;
+    const { description, provider } = this.state;
+
+    if (!provider) {
+      return this.setState({
+        errors: { provider: 'Please select a provider' }
+      });
+    } else if (!description) {
+      return this.setState({
+        errors: { description: 'Please select a description' }
+      });
+    }
+
     const { currentUser } = this.context;
 
     createTicketDocument(ticketData, currentUser).then(() =>
@@ -218,7 +230,7 @@ class CreateTicket extends Component {
             name="status"
             value={!leadsman ? 'Unassigned' : this.state.status}
             onChange={this.onChange}
-            placeholderOption="Select Ticket Status *"
+            placeholderOption="Select Ticket Status"
             items={
               leadsman === ''
                 ? [{ label: 'Unassigned', value: 'Unassigned' }]
@@ -235,7 +247,7 @@ class CreateTicket extends Component {
       ticketForm = <div />;
     } else {
       ticketForm = (
-        <form onSubmit={this.onSubmit} noValidate>
+        <form onSubmit={this.onSubmit}>
           {currentUser.role === 'admin' && (
             <SelectListGroup
               name="provider"
@@ -245,6 +257,7 @@ class CreateTicket extends Component {
               items={providerItems}
               fieldLabel={this.state.provider !== '' && 'Ticket Provider:'}
               error={errors.provider}
+              required
             />
           )}
           <SelectListGroup
@@ -259,6 +272,7 @@ class CreateTicket extends Component {
             }
             fieldLabel={this.state.description !== '' && 'Ticket Description:'}
             error={errors.description}
+            required
           />
           {currentUser.role === 'admin' && (
             <button
@@ -299,14 +313,16 @@ class CreateTicket extends Component {
             onChange={this.onChange}
             label={this.state.name !== '' && 'Customer Name:'}
             error={errors.name}
+            required
           />
           <TextFieldGroup
-            placeholder="Customer ID *"
-            name="id"
-            value={this.state.id}
+            placeholder="Account Number *"
+            name="accountNumber"
+            value={this.state.accountNumber}
             onChange={this.onChange}
-            label={this.state.id !== '' && 'Customer ID:'}
-            error={errors.id}
+            label={this.state.accountNumber !== '' && 'Account Number:'}
+            error={errors.accountNumber}
+            required
           />
           <TextFieldGroup
             placeholder="NIN *"
@@ -315,6 +331,7 @@ class CreateTicket extends Component {
             onChange={this.onChange}
             label={this.state.nin !== '' && 'NIN:'}
             error={errors.nin}
+            required
           />
           <TextFieldGroup
             placeholder="Address *"
@@ -323,6 +340,7 @@ class CreateTicket extends Component {
             onChange={this.onChange}
             label={this.state.address !== '' && 'Address:'}
             error={errors.address}
+            required
           />
           <TextFieldGroup
             placeholder="Parcel Number *"
@@ -331,6 +349,7 @@ class CreateTicket extends Component {
             onChange={this.onChange}
             label={this.state.parcelNumber !== '' && 'Parcel Number:'}
             error={errors.parcelNumber}
+            required
           />
           {this.state.telephone1 !== '' && (
             <label className="text-muted">Telephone Number(s):</label>
@@ -343,6 +362,7 @@ class CreateTicket extends Component {
                 value={this.state.telephone1}
                 onChange={this.onChange}
                 error={errors.telephone1}
+                required
               />
             </div>
             <div className="col-2">

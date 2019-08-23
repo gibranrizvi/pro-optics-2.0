@@ -10,7 +10,8 @@ const SelectListGroup = ({
   onChange,
   placeholderOption,
   items,
-  disabled
+  disabled,
+  required
 }) => {
   return (
     <div className="form-group">
@@ -23,6 +24,7 @@ const SelectListGroup = ({
         info={info}
         type={type}
         disabled={disabled}
+        required={required}
       >
         {placeholderOption && <option hidden>{placeholderOption}</option>}
         {items &&
